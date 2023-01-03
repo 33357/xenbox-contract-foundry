@@ -1,1 +1,20 @@
-{}
+{
+  "1": {
+    "XenBox": {
+      "proxyAddress": "0x23b4F4B4Fd084847ff824573c0BAC145062608C0",
+      "implAddress": "0x23b4F4B4Fd084847ff824573c0BAC145062608C0",
+      "version": "1.0.0",
+      "contract": "XenBox",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 16247329
+    },
+    "XenBoxHelper": {
+      "proxyAddress": "0xF2D3c724343B89b7E3829E01a18E6eC7B989d1c8",
+      "implAddress": "0xF2D3c724343B89b7E3829E01a18E6eC7B989d1c8",
+      "version": "1.0.0",
+      "contract": "XenBoxHelper",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 16288583
+    }
+  }
+}
