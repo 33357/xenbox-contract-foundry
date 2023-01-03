@@ -59,11 +59,7 @@ contract XenBox is ERC721, Ownable {
         return baseURI;
     }
 
-    function _batchCreate(
-        uint256 start,
-        uint256 end,
-        uint256 term
-    ) internal {
+    function _batchCreate(uint256 start, uint256 end, uint256 term) internal {
         bytes memory code = abi.encodePacked(
             bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
             address(this),
@@ -78,11 +74,7 @@ contract XenBox is ERC721, Ownable {
         }
     }
 
-    function _batchRankAndReward(
-        uint256 start,
-        uint256 end,
-        uint256 term
-    ) internal {
+    function _batchRankAndReward(uint256 start, uint256 end, uint256 term) internal {
         for (uint256 i = start; i < end; i++) {
             IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), i, codehash))))))
                 .rankAndReward(term);
