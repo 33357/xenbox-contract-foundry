@@ -2,11 +2,11 @@ import fs from "fs";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-preprocessor";
-import '@nomiclabs/hardhat-etherscan';
+import "@nomiclabs/hardhat-etherscan";
 import { HardhatUserConfig } from "hardhat/config";
 
-if (fs.existsSync('./sdk/src/typechain')) {
-  import('./tasks');
+if (fs.existsSync("./sdk/src/typechain")) {
+  import("./tasks");
 }
 
 function getRemappings() {
@@ -32,8 +32,8 @@ const config: HardhatUserConfig = {
     cache: "./cache_hardhat", // Use a different cache for Hardhat than Foundry
   },
   typechain: {
-    outDir: './sdk/src/typechain',
-    target: 'ethers-v5',
+    outDir: "./sdk/src/typechain",
+    target: "ethers-v5",
   },
   // This fully resolves paths for imports in the ./lib directory for Hardhat
   preprocess: {
@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
       transform: (line: string) => {
         if (line.match(/^\s*import /i)) {
           getRemappings().forEach(([find, replace]) => {
-            if (line.match(find)) {
+            if (line.match(find) && find != "@openzeppelin/") {
               line = line.replace(find, replace);
             }
           });
