@@ -40,7 +40,7 @@ contract XenBoxHelper {
 
     /* ================ UTIL FUNCTIONS ================ */
 
-    function _penalty(uint256 secsLate) internal view returns (uint256) {
+    function _penalty(uint256 secsLate) public view returns (uint256) {
         uint256 daysLate = secsLate / xen.SECONDS_IN_DAY();
         if (daysLate > xen.WITHDRAWAL_WINDOW_DAYS() - 1) return xen.MAX_PENALTY_PCT();
         uint256 penalty = (uint256(1) << (daysLate + 3)) / xen.WITHDRAWAL_WINDOW_DAYS() - 1;

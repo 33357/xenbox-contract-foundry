@@ -17,6 +17,17 @@ function getRemappings() {
     .map((line) => line.trim().split('='));
 }
 
+const mnemonic = 'test test test test test test test test test test test junk';
+const privateKey = process.env.PRIVATE_KEY;
+let accounts;
+if (privateKey) {
+  accounts = [privateKey];
+} else {
+  accounts = {
+    mnemonic,
+  };
+}
+
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.17',
@@ -25,6 +36,13 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
+    },
+  },
+  networks: {
+    1: {
+      url: process.env.PROVIDER ? process.env.PROVIDER : '',
+      accounts,
+      timeout: 60000,
     },
   },
   paths: {
