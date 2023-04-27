@@ -118,9 +118,6 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
 
     function mint(uint256 amount, uint256 term, address refer) external {
         require(amount == 100 || amount == 50 || amount == 20 || amount == 10, "error amount");
-        if (refer != address(0)) {
-            require(refer != msg.sender && balanceOf(refer) != 0, "error refer");
-        }
         uint256 end = totalProxy + amount;
         _batchCreate(totalProxy, end, term);
         _mint(msg.sender, totalToken);
@@ -138,7 +135,7 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         uint256 getAmount = (getBalance * (10000 - fee)) / 10000;
         address refer = tokenMap[tokenId].refer;
         uint256 rewardAmount;
-        if (refer != address(0)) {
+        if (refer != address(0) && balanceOf(refer) != 0 && refer != msg.sender) {
             rewardAmount = (getBalance * referFee) / 10000;
             rewardMap[refer] += rewardAmount;
         }
