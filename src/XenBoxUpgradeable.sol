@@ -1,8 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 interface IProxy {
     function rank(uint256 term) external;
@@ -20,10 +22,11 @@ interface IXen {
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
-contract XenBox2 is ERC721, Ownable {
+contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     struct Token {
-        uint128 start;
-        uint128 end;
+        uint48 start;
+        uint48 end;
+        address refer;
     }
 
     bytes32 public immutable codehash =
@@ -43,31 +46,34 @@ contract XenBox2 is ERC721, Ownable {
 
     uint256 public totalToken;
 
-    uint256 public fee = 1000;
+    uint256 public fee = 500;
 
-    uint256 public referFee = 400;
+    uint256 public referFee = 100;
 
-    uint256 public feeBack = 200;
+    uint256 public feeBack = 100;
 
     string public baseURI = "";
 
     mapping(uint256 => Token) public tokenMap;
 
-    mapping(address => address) public referMap;
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
 
-    constructor() ERC721("xenbox.store", "XenBox") {}
+    function initialize() external initializer {
+        __UUPSUpgradeable_init();
+        __Ownable_init();
+        __ERC721_init_unchained("xenbox.store", "XenBox2");
+    }
 
     /* ================ UTIL FUNCTIONS ================ */
+
+    function _authorizeUpgrade(address) internal view override onlyOwner {}
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
-    function _batchCreate(
-        uint256 start,
-        uint256 end,
-        uint256 term
-    ) internal {
+    function _batchCreate(uint256 start, uint256 end, uint256 term) internal {
         bytes memory code = abi.encodePacked(
             bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
             address(this),
@@ -82,11 +88,7 @@ contract XenBox2 is ERC721, Ownable {
         }
     }
 
-    function _batchRankAndReward(
-        uint256 start,
-        uint256 end,
-        uint256 term
-    ) internal {
+    function _batchRankAndReward(uint256 start, uint256 end, uint256 term) internal {
         for (uint256 i = start; i < end; i++) {
             IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), i, codehash))))))
                 .rankAndReward(term);
@@ -106,36 +108,36 @@ contract XenBox2 is ERC721, Ownable {
 
     /* ================ VIEW FUNCTIONS ================ */
 
+    function version() public pure returns (string memory) {
+        return "1.0.0";
+    }
+
     /* ================ TRAN FUNCTIONS ================ */
 
-    function mint(
-        uint256 amount,
-        uint256 term,
-        address refer
-    ) external {
+    function mint(uint256 amount, uint256 term, address refer) external {
         require(amount == 100 || amount == 50 || amount == 20 || amount == 10, "error amount");
-        require(refer != msg.sender, "error refer");
+        if (refer != address(0)) {
+            require(refer != msg.sender && balanceOf(refer) != 0, "error refer");
+        }
         uint256 end = totalProxy + amount;
         _batchCreate(totalProxy, end, term);
         _mint(msg.sender, totalToken);
-        tokenMap[totalToken] = Token({start: uint128(totalProxy), end: uint128(end)});
-        if (referMap[msg.sender] == address(0) && refer != address(0)) {
-            referMap[msg.sender] = refer;
-        }
+        tokenMap[totalToken] = Token({start: uint48(totalProxy), end: uint48(end), refer: refer});
         totalProxy += amount;
         totalToken++;
     }
 
     function claim(uint256 tokenId, uint256 term) external {
-        require(ownerOf(tokenId) == msg.sender, "XenBox: not owner");
+        require(ownerOf(tokenId) == msg.sender, "not owner");
         IXen xen = IXen(_xen);
         uint256 beforeBalance = xen.balanceOf(address(this));
         _batchRankAndReward(tokenMap[tokenId].start, tokenMap[tokenId].end, term);
         uint256 getBalance = xen.balanceOf(address(this)) - beforeBalance;
         uint256 getAmount;
-        if (referMap[msg.sender] != address(0)) {
+        address refer = tokenMap[tokenId].refer;
+        if (refer != address(0)) {
             getAmount = (getBalance * (10000 - fee + feeBack)) / 10000;
-            xen.transfer(referMap[msg.sender], getBalance * referFee);
+            xen.transfer(refer, getBalance * referFee);
         } else {
             getAmount = (getBalance * (10000 - fee)) / 10000;
         }
@@ -149,11 +151,7 @@ contract XenBox2 is ERC721, Ownable {
         xen.transfer(to, xen.balanceOf(address(this)));
     }
 
-    function setFee(
-        uint256 _fee,
-        uint256 _referFee,
-        uint256 _feeBack
-    ) external onlyOwner {
+    function setFee(uint256 _fee, uint256 _referFee, uint256 _feeBack) external onlyOwner {
         fee = _fee;
         feeBack = _feeBack;
         referFee = _referFee;
