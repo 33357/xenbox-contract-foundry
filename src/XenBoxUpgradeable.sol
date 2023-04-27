@@ -23,6 +23,12 @@ interface IXen {
 }
 
 contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
+    event Minted(address indexed sender, uint256 indexed tokenId, address indexed refer);
+
+    event Claimed(address indexed sender, uint256 indexed tokenId, uint256 getAmount);
+
+    event Reward(uint256 indexed tokenId, address indexed refer, uint256 rewardAmount);
+
     struct Token {
         uint48 start;
         uint48 end;
@@ -55,6 +61,8 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
     string public baseURI = "https://xenbox.store/api/token/";
 
     mapping(uint256 => Token) public tokenMap;
+
+    mapping(address => bool) public isRefer;
 
     mapping(address => uint256) public rewardMap;
 
@@ -123,7 +131,11 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         _mint(msg.sender, totalToken);
         tokenMap[totalToken] = Token({start: uint48(totalProxy), end: uint48(end), refer: refer});
         totalProxy += amount;
+        emit Minted(msg.sender, totalToken, refer);
         totalToken++;
+        if(!isRefer[msg.sender] && amount == 100){
+            isRefer[msg.sender] = true;
+        }
     }
 
     function claim(uint256 tokenId, uint256 term) external {
@@ -135,12 +147,14 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         uint256 getAmount = (getBalance * (10000 - fee)) / 10000;
         address refer = tokenMap[tokenId].refer;
         uint256 rewardAmount;
-        if (refer != address(0) && balanceOf(refer) != 0 && refer != msg.sender) {
+        if (refer != address(0) && isRefer[refer] && refer != msg.sender) {
             rewardAmount = (getBalance * referFee) / 10000;
             rewardMap[refer] += rewardAmount;
+            emit Reward(tokenId, refer, rewardAmount);
         }
         totalFee += getBalance - getAmount - rewardAmount;
         xen.transfer(msg.sender, getAmount);
+        emit Claimed(msg.sender, tokenId, getAmount);
     }
 
     function getReward() external {
