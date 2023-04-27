@@ -46,15 +46,17 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
 
     uint256 public totalToken;
 
+    uint256 public totalFee;
+
     uint256 public fee = 500;
 
     uint256 public referFee = 100;
 
-    uint256 public feeBack = 100;
-
     string public baseURI = "https://xenbox.store/api/token/";
 
     mapping(uint256 => Token) public tokenMap;
+
+    mapping(address => uint256) public rewardMap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -133,27 +135,32 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         uint256 beforeBalance = xen.balanceOf(address(this));
         _batchRankAndReward(tokenMap[tokenId].start, tokenMap[tokenId].end, term);
         uint256 getBalance = xen.balanceOf(address(this)) - beforeBalance;
-        uint256 getAmount;
+        uint256 getAmount = (getBalance * (10000 - fee)) / 10000;
         address refer = tokenMap[tokenId].refer;
+        uint256 rewardAmount;
         if (refer != address(0)) {
-            getAmount = (getBalance * (10000 - fee + feeBack)) / 10000;
-            xen.transfer(refer, getBalance * referFee);
-        } else {
-            getAmount = (getBalance * (10000 - fee)) / 10000;
+            rewardAmount = (getBalance * referFee) / 10000;
+            rewardMap[refer] += rewardAmount;
         }
+        totalFee += getBalance - getAmount - rewardAmount;
         xen.transfer(msg.sender, getAmount);
+    }
+
+    function getReward() external {
+        uint256 rewardAmount = rewardMap[msg.sender];
+        rewardMap[msg.sender] = 0;
+        IXen(_xen).transfer(msg.sender, rewardAmount);
     }
 
     /* ================ ADMIN FUNCTIONS ================ */
 
-    function get(address to) external onlyOwner {
-        IXen xen = IXen(_xen);
-        xen.transfer(to, xen.balanceOf(address(this)));
+    function getFee(address to) external onlyOwner {
+        IXen(_xen).transfer(to, totalFee);
+        totalFee = 0;
     }
 
-    function setFee(uint256 _fee, uint256 _referFee, uint256 _feeBack) external onlyOwner {
+    function setFee(uint256 _fee, uint256 _referFee) external onlyOwner {
         fee = _fee;
-        feeBack = _feeBack;
         referFee = _referFee;
     }
 
