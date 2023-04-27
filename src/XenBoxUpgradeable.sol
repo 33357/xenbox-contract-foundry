@@ -52,7 +52,7 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
 
     uint256 public feeBack = 100;
 
-    string public baseURI = "";
+    string public baseURI = "https://xenbox.store/api/token/";
 
     mapping(uint256 => Token) public tokenMap;
 
