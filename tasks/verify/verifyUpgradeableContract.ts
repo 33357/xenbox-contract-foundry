@@ -4,21 +4,25 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {getDeployment, log} from '../utils';
 
 task(`upgradeableContract:verify`, `verify upgradeableContract`)
-  .addOptionalParam('contract', 'The contract name')
+  .addOptionalParam('name', 'The contract name')
   .addOptionalParam('args', 'The contract args')
   .addOptionalParam('address', 'The contract address')
   .setAction(async (args, hre: HardhatRuntimeEnvironment) => {
-    const contract = args['contract'];
+    const contractName = args['name'];
     const contractArgs = JSON.parse(args['args']);
     const deployment = await getDeployment(
-      Number(await (<any>hre).getChainId())
+      (
+        await hre.ethers.provider.getNetwork()
+      ).chainId
     );
     const address = args['address']
       ? args['address']
-      : deployment[contract].implAddress;
-    log(`verify ${contract}, address: ${address}`);
+      : deployment[contractName].implAddress;
+
+    log(`verify ${contractName}, address: ${address}`);
+
     await hre.run('verify:verify', {
-      address: deployment[contract].implAddress,
+      address: deployment[contractName].implAddress,
       constructorArguments: contractArgs,
     });
   });

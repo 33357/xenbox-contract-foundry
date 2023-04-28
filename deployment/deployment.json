@@ -12,9 +12,24 @@
       "proxyAddress": "0xF2D3c724343B89b7E3829E01a18E6eC7B989d1c8",
       "implAddress": "0xF2D3c724343B89b7E3829E01a18E6eC7B989d1c8",
       "version": "1.0.0",
-      "contract": "XenBoxHelper",
       "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
       "fromBlock": 16288583
+    },
+    "XenBoxUpgradeable": {
+      "proxyAddress": "0xdF0aEd36B0423D58D03757Ab177f1f6c1EcAA833",
+      "implAddress": "0xbc352bf871581D933728536669E5dfD558D244b0",
+      "version": "0.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 17141475
+    }
+  },
+  "56": {
+    "XenBoxUpgradeable": {
+      "proxyAddress": "0x2FF6B8E1912DcB3BBB384AfB5CEC6ca6F50449D4",
+      "implAddress": "0x604995B9377Ac6d9aBbC57b902f6936Df69D01db",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 27731105
     }
   }
 }

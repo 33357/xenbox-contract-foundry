@@ -3,6 +3,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
 import 'hardhat-preprocessor';
 import '@nomiclabs/hardhat-etherscan';
+import '@openzeppelin/hardhat-upgrades';
 import {HardhatUserConfig} from 'hardhat/config';
 
 if (fs.existsSync('./sdk/src/typechain')) {
@@ -40,6 +41,11 @@ const config: HardhatUserConfig = {
   },
   networks: {
     1: {
+      url: process.env.PROVIDER ? process.env.PROVIDER : '',
+      accounts,
+      timeout: 60000,
+    },
+    56: {
       url: process.env.PROVIDER ? process.env.PROVIDER : '',
       accounts,
       timeout: 60000,

@@ -47,20 +47,10 @@ export async function setDeployment(
   }
 }
 
-export const EMPTY_CONTRACT = {
-  proxyAddress: '',
-  implAddress: '',
-  version: '',
-  contract: '',
-  operator: '',
-  fromBlock: 0,
-};
-
 export interface ContractInfo {
   proxyAddress: string;
   implAddress: string;
   version: string;
-  contract: string;
   operator: string;
   fromBlock: number;
 }
