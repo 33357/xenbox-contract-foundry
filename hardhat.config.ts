@@ -50,6 +50,11 @@ const config: HardhatUserConfig = {
       accounts,
       timeout: 60000,
     },
+    137: {
+      url: process.env.PROVIDER ? process.env.PROVIDER : '',
+      accounts,
+      timeout: 60000,
+    },
   },
   paths: {
     sources: './src', // Use ./src rather than ./contracts as Hardhat expects

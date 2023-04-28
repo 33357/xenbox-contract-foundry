@@ -47,15 +47,17 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
 
     string public baseURI;
 
-    address constant _xen = 0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e;
-
-    address constant _proxy = 0x2FF6B8E1912DcB3BBB384AfB5CEC6ca6F50449D4;
-
     mapping(uint256 => Token) public tokenMap;
 
     mapping(address => bool) public isRefer;
 
     mapping(address => uint256) public rewardMap;
+
+    address public constant xenAddress = 0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e;
+
+    address public constant proxyAddress = 0x2FF6B8E1912DcB3BBB384AfB5CEC6ca6F50449D4;
+
+    address public constant implAddress = 0x5fdC81E73b80EB03b861B73666c2A0e9adCD5960;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -80,7 +82,7 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
     function _batchCreate(uint256 start, uint256 end, uint256 term) internal {
         bytes memory code = abi.encodePacked(
             bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
-            address(this),
+            implAddress,
             bytes15(0x5af43d82803e903d91602b57fd5bf3)
         );
         for (uint256 i = start; i < end; i++) {
@@ -96,25 +98,26 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         bytes32 _codehash = keccak256(
             abi.encodePacked(
                 bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
-                address(this),
+                implAddress,
                 bytes15(0x5af43d82803e903d91602b57fd5bf3)
             )
         );
         for (uint256 i = start; i < end; i++) {
-            IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), i, _codehash))))))
+            IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), implAddress, i, _codehash))))))
                 .rankAndReward(term);
         }
     }
 
     function rankAndReward(uint256 term) external {
-        require(msg.sender == _proxy);
-        IXen(_xen).claimMintRewardAndShare(_proxy, 100);
-        IXen(_xen).claimRank(term);
+        require(msg.sender == proxyAddress);
+        IXen xen = IXen(xenAddress);
+        xen.claimMintRewardAndShare(proxyAddress, 100);
+        xen.claimRank(term);
     }
 
     function rank(uint256 term) external {
-        require(msg.sender == _proxy);
-        IXen(_xen).claimRank(term);
+        require(msg.sender == proxyAddress);
+        IXen(xenAddress).claimRank(term);
     }
 
     /* ================ VIEW FUNCTIONS ================ */
@@ -141,7 +144,7 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
 
     function claim(uint256 tokenId, uint256 term) external {
         require(ownerOf(tokenId) == msg.sender, "not owner");
-        IXen xen = IXen(_xen);
+        IXen xen = IXen(xenAddress);
         uint256 beforeBalance = xen.balanceOf(address(this));
         _batchRankAndReward(tokenMap[tokenId].start, tokenMap[tokenId].end, term);
         uint256 getBalance = xen.balanceOf(address(this)) - beforeBalance;
@@ -161,13 +164,13 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
     function getReward() external {
         uint256 rewardAmount = rewardMap[msg.sender];
         rewardMap[msg.sender] = 0;
-        IXen(_xen).transfer(msg.sender, rewardAmount);
+        IXen(xenAddress).transfer(msg.sender, rewardAmount);
     }
 
     /* ================ ADMIN FUNCTIONS ================ */
 
     function getFee(address to) external onlyOwner {
-        IXen(_xen).transfer(to, totalFee);
+        IXen(xenAddress).transfer(to, totalFee);
         totalFee = 0;
     }
 
