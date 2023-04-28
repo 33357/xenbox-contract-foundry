@@ -8,8 +8,6 @@ interface IProxy {
     function rank(uint256 term) external;
 
     function rankAndReward(uint256 term) external;
-
-    function delegatecall(address impl, bytes calldata data) external payable;
 }
 
 interface IXen {
@@ -96,24 +94,6 @@ contract XenBox2 is ERC721, Ownable {
         }
     }
 
-    function _batchRun(uint256 start, uint256 end, address impl, bytes calldata data) internal {
-        bytes32 _codehash = keccak256(
-            abi.encodePacked(
-                bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
-                _thisAddress,
-                bytes15(0x5af43d82803e903d91602b57fd5bf3)
-            )
-        );
-        uint256 value;
-        unchecked {
-            value = msg.value / (end - start);
-        }
-        for (uint256 i = start; i < end; i++) {
-            IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), _thisAddress, i, _codehash))))))
-                .delegatecall{value: value}(impl, data);
-        }
-    }
-
     function rankAndReward(uint256 term) external {
         require(msg.sender == _thisAddress);
         IXen xen = IXen(xenAddress);
@@ -124,12 +104,6 @@ contract XenBox2 is ERC721, Ownable {
     function rank(uint256 term) external {
         require(msg.sender == _thisAddress);
         IXen(xenAddress).claimRank(term);
-    }
-
-    function delegatecall(address impl, bytes calldata data) external payable {
-        require(msg.sender == _thisAddress);
-        (bool s, ) = impl.delegatecall(data);
-        require(s);
     }
 
     /* ================ VIEW FUNCTIONS ================ */
@@ -175,12 +149,6 @@ contract XenBox2 is ERC721, Ownable {
         IXen(xenAddress).transfer(msg.sender, rewardAmount);
     }
 
-    function run(uint256 tokenId, address impl, bytes calldata data) external {
-        require(ownerOf(tokenId) == msg.sender, "not owner");
-        require(implMap[impl], "not allow impl");
-        _batchRun(tokenMap[tokenId].start, tokenMap[tokenId].end, impl, data);
-    }
-
     /* ================ ADMIN FUNCTIONS ================ */
 
     function getFee(address to) external onlyOwner {
@@ -195,13 +163,5 @@ contract XenBox2 is ERC721, Ownable {
 
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
-    }
-
-    function addImpl(address impl) external onlyOwner {
-        implMap[impl] = true;
-    }
-
-    function removeImpl(address impl) external onlyOwner {
-        implMap[impl] = false;
     }
 }
