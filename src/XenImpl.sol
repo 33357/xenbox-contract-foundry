@@ -36,11 +36,11 @@ contract XenImpl is Ownable {
 
     /* ================ UTIL FUNCTIONS ================ */
 
-    function start() external payable {
+    function start() external{
         beforeBalance = IXen(xenAddress).balanceOf(address(this));
     }
 
-    function end(address refer) external {
+    function end(address refer) external payable {
         uint256 getBalance = IXen(xenAddress).balanceOf(address(this)) - beforeBalance;
         if (getBalance > 0) {
             uint256 getAmount = (getBalance * (10000 - fee)) / 10000;

@@ -9,9 +9,9 @@ interface IProxy {
 }
 
 interface Impl {
-    function start() external payable;
+    function start() external;
 
-    function end(address refer) external;
+    function end(address refer) external payable;
 
     function useFee() external view returns (uint256);
 
@@ -64,7 +64,7 @@ contract AddressBox is ERC721, Ownable {
             bytes15(0x5af43d82803e903d91602b57fd5bf3)
         );
         Impl _impl = Impl(impl);
-        _impl.start{value: _impl.useFee()}();
+        _impl.start();
         uint256 runValue = _impl.runValue();
         for (uint256 i = start; i < end; i++) {
             IProxy proxy;
@@ -73,7 +73,7 @@ contract AddressBox is ERC721, Ownable {
             }
             proxy.delegatecall{value: runValue}(impl, data);
         }
-        _impl.end(refer);
+        _impl.end{value: _impl.useFee()}(refer);
     }
 
     function _batchRun(uint256 start, uint256 end, address impl, address refer, bytes calldata data) internal {
@@ -85,13 +85,13 @@ contract AddressBox is ERC721, Ownable {
             )
         );
         Impl _impl = Impl(impl);
-        _impl.start{value: _impl.useFee()}();
+        _impl.start();
         uint256 runValue = _impl.runValue();
         for (uint256 i = start; i < end; i++) {
             IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), _thisAddress, i, _codehash))))))
                 .delegatecall{value: runValue}(impl, data);
         }
-        _impl.end(refer);
+        _impl.end{value: _impl.useFee()}(refer);
     }
 
     function delegatecall(address impl, bytes calldata data) external payable {
