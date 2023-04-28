@@ -134,10 +134,6 @@ contract XenBox2 is ERC721, Ownable {
 
     /* ================ VIEW FUNCTIONS ================ */
 
-    function version() public pure returns (string memory) {
-        return "1.0.0";
-    }
-
     /* ================ TRAN FUNCTIONS ================ */
 
     function mint(uint256 amount, uint256 term, address refer) external {
