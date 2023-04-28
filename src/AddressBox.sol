@@ -8,6 +8,12 @@ interface IProxy {
     function delegatecall(address impl, bytes calldata data) external payable;
 }
 
+interface Impl {
+    function start() external;
+
+    function end(address refer) external;
+}
+
 contract AddressBox is ERC721, Ownable {
     struct Token {
         uint128 start;
@@ -47,14 +53,7 @@ contract AddressBox is ERC721, Ownable {
         }
     }
 
-    function _batchCreateAndRun(
-        uint256 start,
-        uint256 end,
-        address impl,
-        bytes calldata startData,
-        bytes calldata endData,
-        bytes calldata runData
-    ) internal {
+    function _batchCreateAndRun(uint256 start, uint256 end, address impl, address refer, bytes calldata data) internal {
         bytes memory code = abi.encodePacked(
             bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
             _thisAddress,
@@ -64,25 +63,18 @@ contract AddressBox is ERC721, Ownable {
         unchecked {
             value = msg.value / (end - start);
         }
-        impl.call(startData);
+        Impl(impl).start();
         for (uint256 i = start; i < end; i++) {
             IProxy proxy;
             assembly {
                 proxy := create2(0, add(code, 32), mload(code), i)
             }
-            proxy.delegatecall{value: value}(impl, runData);
+            proxy.delegatecall{value: value}(impl, data);
         }
-        impl.call(endData);
+        Impl(impl).end(refer);
     }
 
-    function _batchRun(
-        uint256 start,
-        uint256 end,
-        address impl,
-        bytes calldata startData,
-        bytes calldata endData,
-        bytes calldata runData
-    ) internal {
+    function _batchRun(uint256 start, uint256 end, address impl, address refer, bytes calldata data) internal {
         bytes32 _codehash = keccak256(
             abi.encodePacked(
                 bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
@@ -94,12 +86,12 @@ contract AddressBox is ERC721, Ownable {
         unchecked {
             value = msg.value / (end - start);
         }
-        impl.call(startData);
+        Impl(impl).start();
         for (uint256 i = start; i < end; i++) {
             IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), _thisAddress, i, _codehash))))))
-                .delegatecall{value: value}(impl, runData);
+                .delegatecall{value: value}(impl, data);
         }
-        impl.call(endData);
+        Impl(impl).end(refer);
     }
 
     function delegatecall(address impl, bytes calldata data) external payable {
@@ -115,19 +107,13 @@ contract AddressBox is ERC721, Ownable {
 
     /* ================ TRAN FUNCTIONS ================ */
 
-    function mint(
-        uint256 amount,
-        address impl,
-        bytes calldata startData,
-        bytes calldata endData,
-        bytes calldata runData
-    ) external payable {
+    function mint(uint256 amount, address impl, address refer, bytes calldata data) external payable {
         require(msg.sender == tx.origin, "not user");
         require(amount == 100 || amount == 50 || amount == 20 || amount == 10, "error amount");
         uint256 end = totalProxy + amount;
         if (impl != address(0)) {
             require(implMap[impl], "not allow impl");
-            _batchCreateAndRun(totalProxy, end, impl, startData, endData, runData);
+            _batchCreateAndRun(totalProxy, end, impl, refer, data);
         } else {
             _batchCreate(totalProxy, end);
         }
@@ -137,17 +123,11 @@ contract AddressBox is ERC721, Ownable {
         totalToken++;
     }
 
-    function run(
-        uint256 tokenId,
-        address impl,
-        bytes calldata startData,
-        bytes calldata endData,
-        bytes calldata runData
-    ) external payable {
+    function run(uint256 tokenId, address impl, address refer, bytes calldata data) external payable {
         require(msg.sender == tx.origin, "not user");
         require(ownerOf(tokenId) == msg.sender, "not owner");
         require(implMap[impl], "not allow impl");
-        _batchRun(tokenMap[tokenId].start, tokenMap[tokenId].end, impl, startData, endData, runData);
+        _batchRun(tokenMap[tokenId].start, tokenMap[tokenId].end, impl, refer, data);
     }
 
     /* ================ ADMIN FUNCTIONS ================ */
