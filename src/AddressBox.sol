@@ -9,9 +9,13 @@ interface IProxy {
 }
 
 interface Impl {
-    function start() external;
+    function start() external payable;
 
     function end(address refer) external;
+
+    function useFee() external view returns (uint256);
+
+    function runValue() external view returns (uint256);
 }
 
 contract AddressBox is ERC721, Ownable {
@@ -59,19 +63,17 @@ contract AddressBox is ERC721, Ownable {
             _thisAddress,
             bytes15(0x5af43d82803e903d91602b57fd5bf3)
         );
-        uint256 value;
-        unchecked {
-            value = msg.value / (end - start);
-        }
-        Impl(impl).start();
+        Impl _impl = Impl(impl);
+        _impl.start{value: _impl.useFee()}();
+        uint256 runValue = _impl.runValue();
         for (uint256 i = start; i < end; i++) {
             IProxy proxy;
             assembly {
                 proxy := create2(0, add(code, 32), mload(code), i)
             }
-            proxy.delegatecall{value: value}(impl, data);
+            proxy.delegatecall{value: runValue}(impl, data);
         }
-        Impl(impl).end(refer);
+        _impl.end(refer);
     }
 
     function _batchRun(uint256 start, uint256 end, address impl, address refer, bytes calldata data) internal {
@@ -82,16 +84,14 @@ contract AddressBox is ERC721, Ownable {
                 bytes15(0x5af43d82803e903d91602b57fd5bf3)
             )
         );
-        uint256 value;
-        unchecked {
-            value = msg.value / (end - start);
-        }
-        Impl(impl).start();
+        Impl _impl = Impl(impl);
+        _impl.start{value: _impl.useFee()}();
+        uint256 runValue = _impl.runValue();
         for (uint256 i = start; i < end; i++) {
             IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), _thisAddress, i, _codehash))))))
-                .delegatecall{value: value}(impl, data);
+                .delegatecall{value: runValue}(impl, data);
         }
-        Impl(impl).end(refer);
+        _impl.end(refer);
     }
 
     function delegatecall(address impl, bytes calldata data) external payable {

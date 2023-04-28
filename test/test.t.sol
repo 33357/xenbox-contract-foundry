@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 
 import "../src/XenBoxHelper.sol";
 
+interface IXen {}
+
 contract XenBoxHelperTest is Test {
     bytes32 immutable codehash1 =
         keccak256(
