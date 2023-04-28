@@ -44,6 +44,8 @@ yarn testc
 ```bash
 source envs/bsc.env
 
+yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:deploy --name XenBox2 --gas-price 3 --args '[]' --network $NETWORK_ID
+
 yarn run env-cmd -f $ENV_FILE yarn run hardhat upgradeableContract:deploy --name XenBoxUpgradeable --gas-price 3 --args '[]' --network $NETWORK_ID
 ```
 
@@ -59,7 +61,7 @@ yarn run env-cmd -f $ENV_FILE yarn run hardhat upgradeableContract:upgrade --pro
 ```bash
 source envs/eth.env
 
-yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:verify --name XenBox --args '[]' --network $NETWORK_ID
+yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:verify --name XenBox2 --args '[]' --network $NETWORK_ID
 
 yarn run env-cmd -f $ENV_FILE yarn run hardhat upgradeableContract:verify --name XenBoxUpgradeable --args '[]' --network $NETWORK_ID
 ```
