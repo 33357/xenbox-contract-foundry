@@ -45,6 +45,12 @@ yarn testc
 source envs/eth.env
 source envs/bsc.env
 source envs/pol.env
+
+PRIVATE_KEY=
+SCAN_API_KEY=
+PROVIDER=
+NETWORK_ID=
+ENV_FILE=envs/eth.env
 ```
 
 ### Deploy
