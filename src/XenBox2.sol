@@ -189,7 +189,7 @@ contract XenBox2 is ERC721, Ownable {
             )
         );
         require(block.timestamp > xen.userMints(proxy1).maturityTs + 60 * 60 * 24 * forceDay, "not time");
-        require(msg.value > forceFee * (tokenMap[tokenId].end - tokenMap[tokenId].start), "not enough fee");
+        require(msg.value == forceFee * (tokenMap[tokenId].end - tokenMap[tokenId].start), "not enough fee");
         _claim(tokenId, term);
         address oldOwner = ownerOf(tokenId);
         _transfer(oldOwner, msg.sender, tokenId);
