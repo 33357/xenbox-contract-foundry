@@ -64,6 +64,8 @@ contract XenBox2 is ERC721, Ownable {
 
     uint256 public forceDay = 30;
 
+    uint256 public forceFee = 0;
+
     string public baseURI = "https://xenbox.store/api/token/";
 
     mapping(uint256 => Token) public tokenMap;
@@ -179,7 +181,7 @@ contract XenBox2 is ERC721, Ownable {
         _claim(tokenId, term);
     }
 
-    function force(uint256 tokenId, uint256 term) external {
+    function force(uint256 tokenId, uint256 term) external payable {
         IXen xen = IXen(xenAddress);
         address proxy1 = address(
             uint160(
@@ -187,6 +189,7 @@ contract XenBox2 is ERC721, Ownable {
             )
         );
         require(block.timestamp > xen.userMints(proxy1).maturityTs + 60 * 60 * 24 * forceDay, "not time");
+        require(msg.value > forceFee * (tokenMap[tokenId].end - tokenMap[tokenId].start), "not enough fee");
         _claim(tokenId, term);
         address oldOwner = ownerOf(tokenId);
         _transfer(oldOwner, msg.sender, tokenId);
@@ -223,6 +226,10 @@ contract XenBox2 is ERC721, Ownable {
 
     function setForceDay(uint256 _forceDay) external onlyOwner {
         forceDay = _forceDay;
+    }
+
+    function setForceFee(uint256 _forceFee) external onlyOwner {
+        forceFee = _forceFee;
     }
 
     function transfer(address token, address to, uint256 amount) external onlyOwner {
