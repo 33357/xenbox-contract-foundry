@@ -39,9 +39,15 @@ contract XenBox2 is ERC721, Ownable {
 
     uint256 public totalFee;
 
-    uint256 public fee = 500;
+    uint256 public fee100 = 500;
 
-    uint256 public referFee = 100;
+    uint256 public fee50 = 600;
+
+    uint256 public fee20 = 700;
+
+    uint256 public fee10 = 800;
+
+    uint256 public referFeePercent = 20;
 
     string public baseURI = "https://xenbox.store/api/token/";
 
@@ -51,11 +57,18 @@ contract XenBox2 is ERC721, Ownable {
 
     mapping(address => uint256) public rewardMap;
 
-    mapping(address => bool) public implMap;
-
     address public constant xenAddress = 0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e;
 
     address immutable _thisAddress = address(this);
+
+    bytes32 public immutable codehash =
+        keccak256(
+            abi.encodePacked(
+                bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
+                address(this),
+                bytes15(0x5af43d82803e903d91602b57fd5bf3)
+            )
+        );
 
     constructor() ERC721("xenbox.store", "XenBox2") {}
 
@@ -68,7 +81,7 @@ contract XenBox2 is ERC721, Ownable {
     function _batchCreate(uint256 start, uint256 end, uint256 term) internal {
         bytes memory code = abi.encodePacked(
             bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
-            _thisAddress,
+            address(this),
             bytes15(0x5af43d82803e903d91602b57fd5bf3)
         );
         for (uint256 i = start; i < end; i++) {
@@ -81,15 +94,8 @@ contract XenBox2 is ERC721, Ownable {
     }
 
     function _batchRankAndReward(uint256 start, uint256 end, uint256 term) internal {
-        bytes32 _codehash = keccak256(
-            abi.encodePacked(
-                bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
-                _thisAddress,
-                bytes15(0x5af43d82803e903d91602b57fd5bf3)
-            )
-        );
         for (uint256 i = start; i < end; i++) {
-            IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), _thisAddress, i, _codehash))))))
+            IProxy(address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), i, codehash))))))
                 .rankAndReward(term);
         }
     }
@@ -130,15 +136,26 @@ contract XenBox2 is ERC721, Ownable {
         uint256 beforeBalance = xen.balanceOf(address(this));
         _batchRankAndReward(tokenMap[tokenId].start, tokenMap[tokenId].end, term);
         uint256 getBalance = xen.balanceOf(address(this)) - beforeBalance;
-        uint256 getAmount = (getBalance * (10000 - fee)) / 10000;
+        uint256 amount = tokenMap[tokenId].end - tokenMap[tokenId].start;
+        uint256 fee;
+        if (amount == 100) {
+            fee = (getBalance * fee100) / 10000;
+        } else if (amount == 50) {
+            fee = (getBalance * fee50) / 10000;
+        } else if (amount == 20) {
+            fee = (getBalance * fee20) / 10000;
+        } else if (amount == 10) {
+            fee = (getBalance * fee10) / 10000;
+        }
         address refer = tokenMap[tokenId].refer;
         uint256 rewardAmount;
         if (isRefer[refer] && refer != msg.sender) {
-            rewardAmount = (getBalance * referFee) / 10000;
+            rewardAmount = (fee * referFeePercent) / 100;
             rewardMap[refer] += rewardAmount;
             emit Reward(tokenId, refer, rewardAmount);
         }
-        totalFee += getBalance - getAmount - rewardAmount;
+        uint256 getAmount = getBalance - fee;
+        totalFee += fee - rewardAmount;
         xen.transfer(msg.sender, getAmount);
         emit Claimed(msg.sender, tokenId, getAmount);
     }
@@ -156,9 +173,15 @@ contract XenBox2 is ERC721, Ownable {
         totalFee = 0;
     }
 
-    function setFee(uint256 _fee, uint256 _referFee) external onlyOwner {
-        fee = _fee;
-        referFee = _referFee;
+    function setFee(uint256 _fee100, uint256 _fee50, uint256 _fee20, uint256 _fee10) external onlyOwner {
+        fee100 = _fee100;
+        fee50 = _fee50;
+        fee20 = _fee20;
+        fee10 = _fee10;
+    }
+
+    function setRefer(uint256 _referFeePercent) external onlyOwner {
+        referFeePercent = _referFeePercent;
     }
 
     function setBaseURI(string memory __baseURI) external onlyOwner {
