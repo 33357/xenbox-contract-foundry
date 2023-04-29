@@ -11,6 +11,15 @@ interface IProxy {
 }
 
 interface IXen {
+    struct MintInfo {
+        address user;
+        uint256 term;
+        uint256 maturityTs;
+        uint256 rank;
+        uint256 amplifier;
+        uint256 eaaRate;
+    }
+
     function claimRank(uint256 term) external;
 
     function claimMintRewardAndShare(address other, uint256 pct) external;
@@ -18,14 +27,18 @@ interface IXen {
     function balanceOf(address account) external view returns (uint256);
 
     function transfer(address recipient, uint256 amount) external returns (bool);
+
+    function userMints(address user) external view returns (MintInfo memory);
 }
 
 contract XenBox2 is ERC721, Ownable {
-    event Minted(address indexed sender, uint256 indexed tokenId, address indexed refer);
+    event Minted(address indexed sender, address indexed refer, uint256 indexed tokenId);
 
     event Claimed(address indexed sender, uint256 indexed tokenId, uint256 getAmount);
 
-    event Reward(uint256 indexed tokenId, address indexed refer, uint256 rewardAmount);
+    event Forced(address indexed from, address indexed to, uint256 indexed tokenId);
+
+    event Reward(address indexed refer, uint256 indexed tokenId, uint256 rewardAmount);
 
     struct Token {
         uint48 start;
@@ -48,6 +61,8 @@ contract XenBox2 is ERC721, Ownable {
     uint256 public fee10 = 800;
 
     uint256 public referFeePercent = 20;
+
+    uint256 public forceDay = 30;
 
     string public baseURI = "https://xenbox.store/api/token/";
 
@@ -100,6 +115,35 @@ contract XenBox2 is ERC721, Ownable {
         }
     }
 
+    function _claim(uint256 tokenId, uint256 term) internal {
+        IXen xen = IXen(xenAddress);
+        uint256 beforeBalance = xen.balanceOf(address(this));
+        _batchRankAndReward(tokenMap[tokenId].start, tokenMap[tokenId].end, term);
+        uint256 getBalance = xen.balanceOf(address(this)) - beforeBalance;
+        uint256 amount = tokenMap[tokenId].end - tokenMap[tokenId].start;
+        uint256 fee;
+        if (amount == 100) {
+            fee = (getBalance * fee100) / 10000;
+        } else if (amount == 50) {
+            fee = (getBalance * fee50) / 10000;
+        } else if (amount == 20) {
+            fee = (getBalance * fee20) / 10000;
+        } else if (amount == 10) {
+            fee = (getBalance * fee10) / 10000;
+        }
+        address refer = tokenMap[tokenId].refer;
+        uint256 rewardAmount;
+        if (isRefer[refer] && refer != msg.sender) {
+            rewardAmount = (fee * referFeePercent) / 100;
+            rewardMap[refer] += rewardAmount;
+            emit Reward(refer, tokenId, rewardAmount);
+        }
+        uint256 getAmount = getBalance - fee;
+        totalFee += fee - rewardAmount;
+        xen.transfer(msg.sender, getAmount);
+        emit Claimed(msg.sender, tokenId, getAmount);
+    }
+
     function rankAndReward(uint256 term) external {
         require(msg.sender == _thisAddress);
         IXen xen = IXen(xenAddress);
@@ -123,7 +167,7 @@ contract XenBox2 is ERC721, Ownable {
         _mint(msg.sender, totalToken);
         tokenMap[totalToken] = Token({start: uint48(totalProxy), end: uint48(end), refer: refer});
         totalProxy += amount;
-        emit Minted(msg.sender, totalToken, refer);
+        emit Minted(msg.sender, refer, totalToken);
         totalToken++;
         if (!isRefer[msg.sender] && amount == 100) {
             isRefer[msg.sender] = true;
@@ -132,32 +176,21 @@ contract XenBox2 is ERC721, Ownable {
 
     function claim(uint256 tokenId, uint256 term) external {
         require(ownerOf(tokenId) == msg.sender, "not owner");
+        _claim(tokenId, term);
+    }
+
+    function force(uint256 tokenId, uint256 term) external {
         IXen xen = IXen(xenAddress);
-        uint256 beforeBalance = xen.balanceOf(address(this));
-        _batchRankAndReward(tokenMap[tokenId].start, tokenMap[tokenId].end, term);
-        uint256 getBalance = xen.balanceOf(address(this)) - beforeBalance;
-        uint256 amount = tokenMap[tokenId].end - tokenMap[tokenId].start;
-        uint256 fee;
-        if (amount == 100) {
-            fee = (getBalance * fee100) / 10000;
-        } else if (amount == 50) {
-            fee = (getBalance * fee50) / 10000;
-        } else if (amount == 20) {
-            fee = (getBalance * fee20) / 10000;
-        } else if (amount == 10) {
-            fee = (getBalance * fee10) / 10000;
-        }
-        address refer = tokenMap[tokenId].refer;
-        uint256 rewardAmount;
-        if (isRefer[refer] && refer != msg.sender) {
-            rewardAmount = (fee * referFeePercent) / 100;
-            rewardMap[refer] += rewardAmount;
-            emit Reward(tokenId, refer, rewardAmount);
-        }
-        uint256 getAmount = getBalance - fee;
-        totalFee += fee - rewardAmount;
-        xen.transfer(msg.sender, getAmount);
-        emit Claimed(msg.sender, tokenId, getAmount);
+        address proxy1 = address(
+            uint160(
+                uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), tokenMap[tokenId].start, codehash)))
+            )
+        );
+        require(block.timestamp > xen.userMints(proxy1).maturityTs + 60 * 60 * 24 * forceDay, "not time");
+        _claim(tokenId, term);
+        address oldOwner = ownerOf(tokenId);
+        _transfer(oldOwner, msg.sender, tokenId);
+        emit Forced(oldOwner, msg.sender, tokenId);
     }
 
     function getReward() external {
@@ -186,6 +219,10 @@ contract XenBox2 is ERC721, Ownable {
 
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
+    }
+
+    function setForceDay(uint256 _forceDay) external onlyOwner {
+        forceDay = _forceDay;
     }
 
     function transfer(address token, address to, uint256 amount) external onlyOwner {
