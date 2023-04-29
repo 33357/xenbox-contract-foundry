@@ -1,5 +1,5 @@
 {
-  "name": "hardhat-foundry-sdk",
+  "name": "xenbox-contract-sdk",
   "version": "0.0.1",
   "main": "dist/index.js",
   "author": "33357 <43600005+33357@users.noreply.github.com>",

@@ -12,9 +12,40 @@
       "proxyAddress": "0xF2D3c724343B89b7E3829E01a18E6eC7B989d1c8",
       "implAddress": "0xF2D3c724343B89b7E3829E01a18E6eC7B989d1c8",
       "version": "1.0.0",
-      "contract": "XenBoxHelper",
       "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
       "fromBlock": 16288583
+    }
+  },
+  "56": {
+    "XenBox2": {
+      "proxyAddress": "0xFA2cf95A6f75E49EAD34abCFfc55D1572dAd8D4d",
+      "implAddress": "0xFA2cf95A6f75E49EAD34abCFfc55D1572dAd8D4d",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 27768511
+    },
+    "XenBoxHelper": {
+      "proxyAddress": "0xdB10E3860Ddc14EddB29E162F97986b937634c00",
+      "implAddress": "0xdB10E3860Ddc14EddB29E162F97986b937634c00",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 27770248
+    }
+  },
+  "137": {
+    "XenBox2": {
+      "proxyAddress": "0x7d770D08F4F61eeC3e8470A72C2b493a1D438014",
+      "implAddress": "0x7d770D08F4F61eeC3e8470A72C2b493a1D438014",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 42092508
+    },
+    "XenBoxHelper": {
+      "proxyAddress": "0xF88999bC756c3D12519d8206e251A47C09245343",
+      "implAddress": "0xF88999bC756c3D12519d8206e251A47C09245343",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 42095088
     }
   }
 }
