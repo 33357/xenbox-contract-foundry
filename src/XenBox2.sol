@@ -176,7 +176,7 @@ contract XenBox2 is ERC721, Ownable {
         }
     }
 
-    function claim(uint256 tokenId, uint256 term) external {
+    function claim(uint256 tokenId, uint256 term) public {
         require(ownerOf(tokenId) == msg.sender, "not owner");
         _claim(tokenId, term);
     }
@@ -194,6 +194,12 @@ contract XenBox2 is ERC721, Ownable {
         address oldOwner = ownerOf(tokenId);
         _transfer(oldOwner, msg.sender, tokenId);
         emit Forced(oldOwner, msg.sender, tokenId);
+    }
+
+    function batchClaim(uint256[] memory tokenIdList, uint256 term) external {
+        for (uint256 i = 0; i < tokenIdList.length; i++) {
+            claim(tokenIdList[i], term);
+        }
     }
 
     function getReward() external {
