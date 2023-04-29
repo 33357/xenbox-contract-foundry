@@ -160,6 +160,15 @@ contract XenBox2 is ERC721, Ownable {
 
     /* ================ VIEW FUNCTIONS ================ */
 
+    function maturityTs(uint256 tokenId) public view returns (uint256) {
+        address proxy = address(
+            uint160(
+                uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), tokenMap[tokenId].start, codehash)))
+            )
+        );
+        return IXen(xenAddress).userMints(proxy).maturityTs;
+    }
+
     /* ================ TRAN FUNCTIONS ================ */
 
     function mint(uint256 amount, uint256 term, address refer) external {
@@ -182,13 +191,7 @@ contract XenBox2 is ERC721, Ownable {
     }
 
     function force(uint256 tokenId, uint256 term) external payable {
-        IXen xen = IXen(xenAddress);
-        address proxy1 = address(
-            uint160(
-                uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), tokenMap[tokenId].start, codehash)))
-            )
-        );
-        require(block.timestamp > xen.userMints(proxy1).maturityTs + 60 * 60 * 24 * forceDay, "not time");
+        require(block.timestamp > maturityTs(tokenId) + 60 * 60 * 24 * forceDay, "not time");
         require(msg.value == forceFee * (tokenMap[tokenId].end - tokenMap[tokenId].start), "not enough fee");
         _claim(tokenId, term);
         address oldOwner = ownerOf(tokenId);

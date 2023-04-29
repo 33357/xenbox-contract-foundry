@@ -32,11 +32,11 @@
       "fromBlock": 27732769
     },
     "XenBox2": {
-      "proxyAddress": "0xfAfc342544D643881133409Ca919a73755f4a12D",
-      "implAddress": "0xfAfc342544D643881133409Ca919a73755f4a12D",
+      "proxyAddress": "0x6B8890DC8f69F8D36F9244710c20C664AB62Eb87",
+      "implAddress": "0x6B8890DC8f69F8D36F9244710c20C664AB62Eb87",
       "version": "1.0.0",
       "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
-      "fromBlock": 27737461
+      "fromBlock": 27767115
     },
     "AddressBox": {
       "proxyAddress": "0x328c43b8a6bD729D8b2b074162c1Cf64C816714b",
