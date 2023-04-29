@@ -180,11 +180,19 @@ contract XenBox2 is ERC721, Ownable {
         fee10 = _fee10;
     }
 
-    function setRefer(uint256 _referFeePercent) external onlyOwner {
+    function setReferFeePercent(uint256 _referFeePercent) external onlyOwner {
         referFeePercent = _referFeePercent;
     }
 
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
+    }
+
+    function transfer(address token, address to, uint256 amount) external onlyOwner {
+        if (token == address(0)) {
+            payable(to).transfer(amount);
+        } else {
+            IXen(token).transfer(to, amount);
+        }
     }
 }
