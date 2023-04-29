@@ -192,7 +192,7 @@ contract XenBox2 is ERC721, Ownable {
 
     function force(uint256 tokenId, uint256 term) external payable {
         require(block.timestamp > maturityTs(tokenId) + 60 * 60 * 24 * forceDay, "not time");
-        require(msg.value == forceFee * (tokenMap[tokenId].end - tokenMap[tokenId].start), "not enough fee");
+        require(msg.value == forceFee * (tokenMap[tokenId].end - tokenMap[tokenId].start), "error fee");
         _claim(tokenId, term);
         address oldOwner = ownerOf(tokenId);
         _transfer(oldOwner, msg.sender, tokenId);
