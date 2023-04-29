@@ -36,7 +36,7 @@ interface IXENContract {
 }
 
 contract XenBoxHelper {
-    IXENContract xen = IXENContract(0x06450dEe7FD2Fb8E39061434BAbCFC05599a6Fb8);
+    IXENContract xen = IXENContract(0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e);
 
     /* ================ UTIL FUNCTIONS ================ */
 
