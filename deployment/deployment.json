@@ -37,6 +37,13 @@
       "version": "1.0.0",
       "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
       "fromBlock": 27770248
+    },
+    "XenBoxUpgradeable": {
+      "proxyAddress": "0xCdea3445c2864AAE99753b880F1b44291950f2cD",
+      "implAddress": "0xfC41c54BA273C0e270177DA49c0fe065F932a793",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 27802476
     }
   },
   "137": {
@@ -53,6 +60,13 @@
       "version": "1.0.0",
       "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
       "fromBlock": 42095088
+    },
+    "XenBoxUpgradeable": {
+      "proxyAddress": "0xF683f0F4eF404cBAFEAdd20fdA73407568A665c5",
+      "implAddress": "0x4b08fC43F5DEcb811f03d2AA0BaB92FdF7b87E21",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 42139316
     }
   }
 }
