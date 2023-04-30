@@ -35,7 +35,7 @@ interface IXenBoxImpl {
 contract XenBoxImpl is IXenBoxImpl {
     address public constant xenAddress = 0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e;
 
-    address immutable _proxyAddress = msg.sender;
+    address public immutable _proxyAddress = msg.sender;
 
     function rankAndReward(uint256 term) external {
         require(msg.sender == _proxyAddress);

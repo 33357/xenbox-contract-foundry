@@ -42,6 +42,8 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
 
     uint256 public forceFee;
 
+    bool public notCheckRefer;
+
     string public baseURI;
 
     address public implAddress;
@@ -70,7 +72,7 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         referFeePercent = 20;
         forceDay = 30;
         baseURI = "https://xenbox.store/api/token2/";
-        implAddress = address(new XenBoxImpl{salt: 0}());
+        implAddress = address(new XenBoxImpl());
         codehash = keccak256(
             abi.encodePacked(
                 bytes20(0x3D602d80600A3D3981F3363d3d373d3D3D363d73),
@@ -133,7 +135,7 @@ contract XenBoxUpgradeable is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgrade
         }
         address refer = tokenMap[tokenId].refer;
         uint256 rewardAmount;
-        if (isRefer[refer] && refer != msg.sender) {
+        if (refer != msg.sender && (isRefer[refer] || notCheckRefer)) {
             rewardAmount = (fee * referFeePercent) / 100;
             rewardMap[refer] += rewardAmount;
             emit Reward(refer, tokenId, rewardAmount);
