@@ -14,6 +14,13 @@
       "version": "1.0.0",
       "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
       "fromBlock": 16288583
+    },
+    "XenBox2": {
+      "proxyAddress": "0x0C9A93b2efe0aD7770FC782Ba40fAc79b3567C65",
+      "implAddress": "0x0C9A93b2efe0aD7770FC782Ba40fAc79b3567C65",
+      "version": "1.0.0",
+      "operator": "0x28C5a66E3682c5c52BC2D11FEF3034b7CB73DA8B",
+      "fromBlock": 17156357
     }
   },
   "56": {
