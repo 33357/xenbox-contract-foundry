@@ -56,9 +56,9 @@ ENV_FILE=envs/eth.env
 ### Deploy
 
 ```bash
-yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:deploy --name XenBox2 --gas-price 30 --args '[]' --network $NETWORK_ID
+yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:deploy --name XenBox2 --max-fee-per-gas 50 --args '[]' --network $NETWORK_ID
 
-yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:deploy --name XenBoxHelper --gas-price 350 --args '[]' --network $NETWORK_ID
+yarn run env-cmd -f $ENV_FILE yarn run hardhat contract:deploy --name XenBoxHelper --max-fee-per-gas 35 --args '[]' --network $NETWORK_ID
 
 yarn run env-cmd -f $ENV_FILE yarn run hardhat upgradeableContract:deploy --name XenBoxUpgradeable --gas-price 3 --args '[]' --network $NETWORK_ID
 ```
