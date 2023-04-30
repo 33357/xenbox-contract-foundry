@@ -74,7 +74,7 @@ contract XenBox2 is ERC721, Ownable {
 
     mapping(address => uint256) public rewardMap;
 
-    address public constant xenAddress = 0x2AB0e9e4eE70FFf1fB9D67031E44F6410170d00e;
+    address public constant xenAddress = 0x06450dEe7FD2Fb8E39061434BAbCFC05599a6Fb8;
 
     address immutable _thisAddress = address(this);
 
